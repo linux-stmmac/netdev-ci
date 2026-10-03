@@ -13,7 +13,7 @@ On the web VM, `netdevci-sync` (every 5 minutes) fetches the repo and mirrors
 ## Install (as root on the VM)
 
 ```sh
-apt install git                  # or dnf; GNU coreutils, findutils, sed
+apt install git rsync            # or dnf; the script refuses to run without them
 install -d -o netdevci -m 0755 /var/www/netdevci/stmmac
 install -m 0755 netdevci-sync /usr/local/bin/netdevci-sync
 install -m 0644 netdevci-sync.service netdevci-sync.timer /etc/systemd/system/
@@ -31,7 +31,7 @@ and sees no `/home`.
 Test links point at directories (`outputs/<run>/test-outputs/<n>-<test>/`),
 so `/stmmac/` needs directory listings; the logs have no extension, so they
 should be served as text. Dotfiles are refused as well, in case one ever
-lands there (a file is copied in as `.netdevci-sync.tmp`, then renamed).
+lands there (rsync stages updates in `.~tmp~` before renaming them in).
 
 In the `server` block serving netdevci.bootlin.com (nginx):
 

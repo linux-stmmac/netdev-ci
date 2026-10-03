@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: GPL-2.0
 # Mirror results/ of the netdev-ci repo into the web root
 set -eu
-export LC_ALL=C
 
 REPO_URL=${REPO_URL:-https://github.com/linux-stmmac/netdev-ci.git}
 BRANCH=${BRANCH:-main}
@@ -10,9 +9,15 @@ SUBDIR=${SUBDIR:-results}
 DEST=${DEST:-/var/www/netdevci/stmmac}
 STATE=${STATE_DIRECTORY:-/var/lib/netdevci-sync}
 
+for tool in git rsync; do
+	if ! command -v "$tool" >/dev/null; then
+		echo "netdevci-sync: $tool is not installed" >&2
+		exit 1
+	fi
+done
+
 repo=$STATE/repo.git
-stage=$STATE/stage
-trap 'rm -rf "$stage" "$STATE/archive.rc" "$STATE/want" "$STATE/have" "$STATE/copy"' EXIT
+tree=$STATE/tree
 
 [ -d "$repo" ] || git init -q --bare "$repo"
 git -C "$repo" fetch -q --depth 1 --no-tags "$REPO_URL" \
@@ -28,58 +33,27 @@ if ! git -C "$repo" cat-file -e "$head:$SUBDIR" 2>/dev/null; then
 	exit 0
 fi
 
-rm -rf "$stage"
-mkdir -p "$stage"
-# A pipe hides git's exit status, and a cut-short archive would read as
-# files removed from results/: the status goes through a file.
-{ git -C "$repo" archive --format=tar "$head" "$SUBDIR/"; echo $? >"$STATE/archive.rc"; } |
-	tar -x -C "$stage" --no-same-owner --no-same-permissions
-[ "$(cat "$STATE/archive.rc")" = 0 ]
+# A checkout that persists from one run to the next: git rewrites only what
+# changed, so the other files keep their mtime and rsync leaves them alone.
+[ -f "$STATE/index" ] || rm -rf "$tree"
+mkdir -p "$tree"
+GIT_DIR=$repo GIT_WORK_TREE=$tree GIT_INDEX_FILE=$STATE/index \
+	git read-tree --reset -u "$head"
 
-# Regular files only, no dotfiles at any depth.
-src=$stage/$SUBDIR
-find "$src" -mindepth 1 -name '.*' -prune -exec rm -rf -- {} +
-find "$src" ! -type f ! -type d -delete
-find "$src" -type d -exec chmod 755 {} +
-find "$src" -type f -exec chmod 644 {} +
-
-mkdir -p "$DEST"
-listing() {
-	(cd "$1" && find . -mindepth 1 -printf '%y %p\0' | sort -z)
-}
-listing "$src" >"$STATE/want"
-listing "$DEST" >"$STATE/have"
-if ! grep -qz '^f ' "$STATE/want"; then
+src=$tree/$SUBDIR
+if [ -z "$(find "$src" -type f ! -path '*/.*' -print -quit)" ]; then
 	echo "netdevci-sync: $head has no file to publish, web root left as it is" >&2
 	exit 1
 fi
-comm -z -23 "$STATE/have" "$STATE/want" | sed -z 's/^. //' |
-	(cd "$DEST" && xargs -0 -r rm -rf --)
 
-{
-	comm -z -13 "$STATE/have" "$STATE/want" | sed -z -n 's|^f \./||p'
-	if old=$(git -C "$repo" rev-parse -q --verify refs/deployed); then
-		git -C "$repo" diff --name-only -z --no-renames "$old" "$head" -- "$SUBDIR/" ||
-			git -C "$repo" ls-tree -r -z --name-only "$head" -- "$SUBDIR/"
-	fi | sed -z "s|^$SUBDIR/||"
-} >"$STATE/copy"
-# results.json last, once every file it names is in place.
-{
-	grep -zvx 'results.json' "$STATE/copy" || true
-	grep -zx 'results.json' "$STATE/copy" | head -zn1
-} | SRC=$src DEST=$DEST xargs -0 -r sh -ec '
-	for rel; do
-		[ -f "$SRC/$rel" ] && [ ! -L "$SRC/$rel" ] || continue
-		case $rel in
-		*/*) dir=$DEST/${rel%/*} ;;
-		*) dir=$DEST ;;
-		esac
-		[ -d "$dir" ] || mkdir -p "$dir"
-		cp --preserve=mode,timestamps "$SRC/$rel" "$dir/.netdevci-sync.tmp"
-		mv -f "$dir/.netdevci-sync.tmp" "$DEST/$rel"
-	done' sh
+# Regular files only (no symlinks, devices or fifos), no dotfiles at any
+# depth; updates land together at the end and deletions after them.
+mkdir -p "$DEST"
+rsync --quiet --recursive --times --perms --chmod=D755,F644 \
+	--no-links --no-devices --no-specials \
+	--exclude='.*' --delete-delay --delete-excluded --delay-updates \
+	"$src/" "$DEST/"
 
-git -C "$repo" update-ref refs/deployed "$head"
 echo "$head" >"$STATE/deployed"
 git -C "$repo" gc --auto -q
 echo "netdevci-sync: published $head"
