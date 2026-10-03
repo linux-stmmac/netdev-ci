@@ -1,8 +1,6 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0
-# Mirror results/ of the netdev-ci repo into the web root, and nothing else:
-# regular files only (no symlinks, devices or fifos), no dotfiles at any depth,
-# and whatever left results/ in the repo is deleted from the web root.
+# Mirror results/ of the netdev-ci repo into the web root
 set -eu
 
 REPO_URL=${REPO_URL:-https://github.com/linux-stmmac/netdev-ci.git}
@@ -24,7 +22,7 @@ if [ -d "$DEST" ] && [ "$(cat "$STATE/deployed" 2>/dev/null)" = "$head" ]; then
 fi
 
 if ! git -C "$repo" cat-file -e "$head:$SUBDIR" 2>/dev/null; then
-	echo "netdevci-sync: $head has no $SUBDIR/, web root left as it is"
+	echo "netdevci-sync: $head has no $SUBDIR/"
 	exit 0
 fi
 
@@ -33,12 +31,39 @@ mkdir -p "$stage"
 git -C "$repo" archive --format=tar "$head" "$SUBDIR/" |
 	tar -x -C "$stage" --no-same-owner --no-same-permissions
 
-mkdir -p "$DEST"
-rsync --recursive --times --no-links --no-devices --no-specials \
-	--exclude='.*' --delete --delete-excluded --delay-updates \
-	--chmod=D755,F644 "$stage/$SUBDIR/" "$DEST/"
+# Regular files only, no dotfiles at any depth.
+src=$stage/$SUBDIR
+find "$src" -mindepth 1 -name '.*' -prune -exec rm -rf -- {} +
+find "$src" ! -type f ! -type d -delete
+find "$src" -type d -exec chmod 755 {} +
+find "$src" -type f -exec chmod 644 {} +
 
-rm -rf "$stage"
+mkdir -p "$DEST"
+listing() {
+	(cd "$1" && find . -mindepth 1 -printf '%y %p\0' | sort -z)
+}
+listing "$src" >"$STATE/want"
+listing "$DEST" >"$STATE/have"
+comm -z -23 "$STATE/have" "$STATE/want" | sed -z 's/^. //' |
+	(cd "$DEST" && xargs -0 -r rm -rf --)
+
+{
+	comm -z -13 "$STATE/have" "$STATE/want" | sed -z -n 's|^f \./||p'
+	if old=$(git -C "$repo" rev-parse -q --verify refs/deployed); then
+		git -C "$repo" diff --name-only -z --no-renames "$old" "$head" -- "$SUBDIR/" ||
+			git -C "$repo" ls-tree -r -z --name-only "$head" -- "$SUBDIR/"
+	fi | sed -z "s|^$SUBDIR/||"
+} | SRC=$src DEST=$DEST xargs -0 -r sh -c '
+	for rel; do
+		[ -f "$SRC/$rel" ] && [ ! -L "$SRC/$rel" ] || continue
+		dir=$(dirname "$DEST/$rel")
+		mkdir -p "$dir"
+		cp --preserve=mode,timestamps "$SRC/$rel" "$dir/.netdevci-sync.tmp"
+		mv -f "$dir/.netdevci-sync.tmp" "$DEST/$rel"
+	done' sh
+
+rm -rf "$stage" "$STATE/want" "$STATE/have"
+git -C "$repo" update-ref refs/deployed "$head"
 echo "$head" >"$STATE/deployed"
 git -C "$repo" gc --auto -q
 echo "netdevci-sync: published $head"
