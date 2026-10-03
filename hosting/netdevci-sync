@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-2.0
 # Mirror results/ of the netdev-ci repo into the web root
 set -eu
+export LC_ALL=C
 
 REPO_URL=${REPO_URL:-https://github.com/linux-stmmac/netdev-ci.git}
 BRANCH=${BRANCH:-main}
@@ -11,6 +12,7 @@ STATE=${STATE_DIRECTORY:-/var/lib/netdevci-sync}
 
 repo=$STATE/repo.git
 stage=$STATE/stage
+trap 'rm -rf "$stage" "$STATE/archive.rc" "$STATE/want" "$STATE/have" "$STATE/copy"' EXIT
 
 [ -d "$repo" ] || git init -q --bare "$repo"
 git -C "$repo" fetch -q --depth 1 --no-tags "$REPO_URL" \
@@ -28,8 +30,11 @@ fi
 
 rm -rf "$stage"
 mkdir -p "$stage"
-git -C "$repo" archive --format=tar "$head" "$SUBDIR/" |
+# A pipe hides git's exit status, and a cut-short archive would read as
+# files removed from results/: the status goes through a file.
+{ git -C "$repo" archive --format=tar "$head" "$SUBDIR/"; echo $? >"$STATE/archive.rc"; } |
 	tar -x -C "$stage" --no-same-owner --no-same-permissions
+[ "$(cat "$STATE/archive.rc")" = 0 ]
 
 # Regular files only, no dotfiles at any depth.
 src=$stage/$SUBDIR
@@ -44,6 +49,10 @@ listing() {
 }
 listing "$src" >"$STATE/want"
 listing "$DEST" >"$STATE/have"
+if ! grep -qz '^f ' "$STATE/want"; then
+	echo "netdevci-sync: $head has no file to publish, web root left as it is" >&2
+	exit 1
+fi
 comm -z -23 "$STATE/have" "$STATE/want" | sed -z 's/^. //' |
 	(cd "$DEST" && xargs -0 -r rm -rf --)
 
@@ -53,16 +62,23 @@ comm -z -23 "$STATE/have" "$STATE/want" | sed -z 's/^. //' |
 		git -C "$repo" diff --name-only -z --no-renames "$old" "$head" -- "$SUBDIR/" ||
 			git -C "$repo" ls-tree -r -z --name-only "$head" -- "$SUBDIR/"
 	fi | sed -z "s|^$SUBDIR/||"
-} | SRC=$src DEST=$DEST xargs -0 -r sh -c '
+} >"$STATE/copy"
+# results.json last, once every file it names is in place.
+{
+	grep -zvx 'results.json' "$STATE/copy" || true
+	grep -zx 'results.json' "$STATE/copy" | head -zn1
+} | SRC=$src DEST=$DEST xargs -0 -r sh -ec '
 	for rel; do
 		[ -f "$SRC/$rel" ] && [ ! -L "$SRC/$rel" ] || continue
-		dir=$(dirname "$DEST/$rel")
-		mkdir -p "$dir"
+		case $rel in
+		*/*) dir=$DEST/${rel%/*} ;;
+		*) dir=$DEST ;;
+		esac
+		[ -d "$dir" ] || mkdir -p "$dir"
 		cp --preserve=mode,timestamps "$SRC/$rel" "$dir/.netdevci-sync.tmp"
 		mv -f "$dir/.netdevci-sync.tmp" "$DEST/$rel"
 	done' sh
 
-rm -rf "$stage" "$STATE/want" "$STATE/have"
 git -C "$repo" update-ref refs/deployed "$head"
 echo "$head" >"$STATE/deployed"
 git -C "$repo" gc --auto -q
