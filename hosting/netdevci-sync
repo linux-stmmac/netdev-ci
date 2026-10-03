@@ -1,0 +1,44 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0
+# Mirror results/ of the netdev-ci repo into the web root, and nothing else:
+# regular files only (no symlinks, devices or fifos), no dotfiles at any depth,
+# and whatever left results/ in the repo is deleted from the web root.
+set -eu
+
+REPO_URL=${REPO_URL:-https://github.com/linux-stmmac/netdev-ci.git}
+BRANCH=${BRANCH:-main}
+SUBDIR=${SUBDIR:-results}
+DEST=${DEST:-/var/www/netdevci/stmmac}
+STATE=${STATE_DIRECTORY:-/var/lib/netdevci-sync}
+
+repo=$STATE/repo.git
+stage=$STATE/stage
+
+[ -d "$repo" ] || git init -q --bare "$repo"
+git -C "$repo" fetch -q --depth 1 --no-tags "$REPO_URL" \
+	"+refs/heads/$BRANCH:refs/heads/$BRANCH"
+head=$(git -C "$repo" rev-parse "refs/heads/$BRANCH")
+
+if [ -d "$DEST" ] && [ "$(cat "$STATE/deployed" 2>/dev/null)" = "$head" ]; then
+	exit 0
+fi
+
+if ! git -C "$repo" cat-file -e "$head:$SUBDIR" 2>/dev/null; then
+	echo "netdevci-sync: $head has no $SUBDIR/, web root left as it is"
+	exit 0
+fi
+
+rm -rf "$stage"
+mkdir -p "$stage"
+git -C "$repo" archive --format=tar "$head" "$SUBDIR/" |
+	tar -x -C "$stage" --no-same-owner --no-same-permissions
+
+mkdir -p "$DEST"
+rsync --recursive --times --no-links --no-devices --no-specials \
+	--exclude='.*' --delete --delete-excluded --delay-updates \
+	--chmod=D755,F644 "$stage/$SUBDIR/" "$DEST/"
+
+rm -rf "$stage"
+echo "$head" >"$STATE/deployed"
+git -C "$repo" gc --auto -q
+echo "netdevci-sync: published $head"
