@@ -1,0 +1,41 @@
+TAP version 13
+1..1
+# overriding timeout to 900
+# selftests: drivers/net: gro_sw.py
+# # WARN: LOCAL_V6 fd00:0:a31::2 not configured with nodad
+# # Interface: eth0, driver: st_gmac
+# Traceback (most recent call last):
+#   File "/usr/lib/kselftests/drivers/net/./gro_sw.py", line 13, in <module>
+#     gro_main(__file__, "sw")
+#     ~~~~~~~~^^^^^^^^^^^^^^^^
+#   File "/usr/lib/kselftests/drivers/net/gro_lib.py", line 479, in gro_main
+#     with NetDrvEpEnv(src_path) as cfg:
+#          ~~~~~~~~~~~^^^^^^^^^^
+#   File "/usr/lib/kselftests/drivers/net/lib/py/env.py", line 188, in __init__
+#     self.remote_ifname = self.resolve_remote_ifc()
+#                          ~~~~~~~~~~~~~~~~~~~~~~~^^
+#   File "/usr/lib/kselftests/drivers/net/lib/py/env.py", line 265, in resolve_remote_ifc
+#     v4 = ip("addr show to " + self.remote_addr_v["4"], json=True, host=self.remote)
+#   File "/usr/lib/kselftests/net/lib/py/utils.py", line 265, in ip
+#     return tool('ip', args, json=json, host=host)
+#   File "/usr/lib/kselftests/net/lib/py/utils.py", line 252, in tool
+#     cmd_obj = cmd(cmd_str, ns=ns, host=host)
+#   File "/usr/lib/kselftests/net/lib/py/utils.py", line 101, in __init__
+#     self.process(terminate=False, fail=fail, expect_fail=expect_fail,
+#     ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#                  timeout=timeout)
+#                  ^^^^^^^^^^^^^^^^
+#   File "/usr/lib/kselftests/net/lib/py/utils.py", line 123, in process
+#     stdout, stderr = self._process_terminate(terminate=terminate,
+#                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+#                                              timeout=timeout)
+#                                              ^^^^^^^^^^^^^^^^
+#   File "/usr/lib/kselftests/net/lib/py/utils.py", line 107, in _process_terminate
+#     stdout, stderr = self.proc.communicate(timeout=timeout)
+#                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+#   File "/usr/lib/python3.14/subprocess.py", line 1221, in communicate
+#   File "/usr/lib/python3.14/subprocess.py", line 2154, in _communicate
+#   File "/usr/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+# subprocess.TimeoutExpired: Command '['ssh', '-q', 'root@10.250.0.1', 'ip --json addr show to 10.49.0.1']' timed out after 20 seconds
+not ok 1 selftests: drivers/net: gro_sw.py # exit=1
+# Totals: pass:0 fail:1 xfail:0 xpass:0 skip:0 error:0
