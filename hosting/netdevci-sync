@@ -41,7 +41,7 @@ GIT_DIR=$repo GIT_WORK_TREE=$tree GIT_INDEX_FILE=$STATE/index \
 	git read-tree --reset -u "$head"
 
 src=$tree/$SUBDIR
-if [ -z "$(find "$src" -type f ! -path '*/.*' -print -quit)" ]; then
+if [ -z "$(find "$src" -mindepth 1 -name '.*' -prune -o -type f -print -quit)" ]; then
 	echo "netdevci-sync: $head has no file to publish, web root left as it is" >&2
 	exit 1
 fi

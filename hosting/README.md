@@ -26,6 +26,23 @@ The service runs as the VM's `netdevci` user, but can write only
 `/var/www/netdevci/stmmac` and its state directory `/var/lib/netdevci-sync`,
 and sees no `/home`.
 
+## Install without root (systemd --user)
+
+As `netdevci`, with git and rsync installed:
+
+```sh
+install -D -m 0755 netdevci-sync ~/.local/bin/netdevci-sync
+install -D -m 0644 user/netdevci-sync.service user/netdevci-sync.timer -t ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now netdevci-sync.timer
+systemctl --user start netdevci-sync.service && journalctl --user -u netdevci-sync -n 20
+loginctl show-user "$USER" -p Linger
+```
+
+The timer only runs while the user manager does: `Linger=yes` keeps it
+running without a login and across reboots (`loginctl enable-linger`, or
+ask the admin). State lives in `~/.local/state/netdevci-sync`.
+
 ## Web server
 
 Test links point at directories (`outputs/<run>/test-outputs/<n>-<test>/`),
