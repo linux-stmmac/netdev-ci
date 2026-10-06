@@ -1,0 +1,66 @@
+TAP version 13
+1..1
+# overriding timeout to 900
+# selftests: drivers/net: netpoll_basic.py
+# # WARN: LOCAL_V6 fd00:0:c0a8:2::6 not configured with nodad
+# # Interface: eth1, driver: st_gmac
+# TAP version 13
+# 1..1
+# Exception in thread Thread-1 (bpftrace_call):
+# Traceback (most recent call last):
+#   File "/usr/lib/python3.14/threading.py", line 1082, in _bootstrap_inner
+#   File "/usr/lib/python3.14/threading.py", line 1024, in run
+#   File "/usr/lib/kselftests/drivers/net/./netpoll_basic.py", line 241, in bpftrace_call
+#     MAPS = bpftrace(expr, timeout=BPFTRACE_TIMEOUT, json=True)
+#   File "/usr/lib/kselftests/net/lib/py/utils.py", line 297, in bpftrace
+#     cmd_obj = cmd(cmd_arr, ns=ns, host=host, shell=False, timeout=timeout)
+#   File "/usr/lib/kselftests/net/lib/py/utils.py", line 87, in __init__
+#     self.proc = subprocess.Popen(comm, shell=shell, stdout=subprocess.PIPE,
+#                 ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#                                  stderr=subprocess.PIPE, pass_fds=pass_fds,
+#                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#                                  env=env)
+#                                  ^^^^^^^^
+#   File "/usr/lib/python3.14/subprocess.py", line 1039, in __init__
+#   File "/usr/lib/python3.14/subprocess.py", line 1990, in _execute_child
+# FileNotFoundError: [Errno 2] No such file or directory: 'bpftrace'
+# # Exception| Traceback (most recent call last):
+# # Exception|   File "/usr/lib/kselftests/drivers/net/./netpoll_basic.py", line 366, in test_netpoll
+# # Exception|     do_netpoll_flush_monitored(cfg, ifname, target_name)
+# # Exception|     ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/./netpoll_basic.py", line 291, in do_netpoll_flush_monitored
+# # Exception|     if bpftrace_any_hit(join=True):
+# # Exception|        ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/./netpoll_basic.py", line 276, in bpftrace_any_hit
+# # Exception|     raise KsftFailEx(f"bpftrace failed to run!?: {MAPS}")
+# # Exception| net.lib.py.ksft.KsftFailEx: bpftrace failed to run!?: {}
+# # Exception| 
+# # Exception| During handling of the above exception, another exception occurred:
+# # Exception| 
+# # Exception| Traceback (most recent call last):
+# # Exception|   File "/usr/lib/kselftests/net/lib/py/ksft.py", line 420, in ksft_run
+# # Exception|     func(*args)
+# # Exception|     ~~~~^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/./netpoll_basic.py", line 369, in test_netpoll
+# # Exception|     traffic.stop()
+# # Exception|     ~~~~~~~~~~~~^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/lib/py/load.py", line 120, in stop
+# # Exception|     self._iperf_client.process(terminate=True)
+# # Exception|     ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/net/lib/py/utils.py", line 123, in process
+# # Exception|     stdout, stderr = self._process_terminate(terminate=terminate,
+# # Exception|                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+# # Exception|                                              timeout=timeout)
+# # Exception|                                              ^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/net/lib/py/utils.py", line 107, in _process_terminate
+# # Exception|     stdout, stderr = self.proc.communicate(timeout=timeout)
+# # Exception|                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/python3.14/subprocess.py", line 1221, in communicate
+# # Exception|   File "/usr/lib/python3.14/subprocess.py", line 2154, in _communicate
+# # Exception|   File "/usr/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+# # Exception| subprocess.TimeoutExpired: Command '['ssh', '-q', 'root@10.250.5.1', 'iperf3 -c fd00:0:c0a8:2::6 -p 46393 -P 16 -t 86400 -J']' timed out after 20 seconds
+# # Exception| 
+# not ok 1 netpoll_basic.test_netpoll
+# # Totals: pass:0 fail:1 xfail:0 xpass:0 skip:0 error:0
+not ok 1 selftests: drivers/net: netpoll_basic.py # exit=1
+# Totals: pass:0 fail:1 xfail:0 xpass:0 skip:0 error:0
