@@ -1,0 +1,33 @@
+TAP version 13
+1..1
+# overriding timeout to 900
+# selftests: drivers/net/hw: userns_devmem.py
+# # WARN: LOCAL_V6 fd00:0:c0a8:2::8 not configured with nodad
+# # Interface: eth1, driver: st_gmac
+# Traceback (most recent call last):
+#   File "/usr/lib/kselftests/drivers/net/hw/./userns_devmem.py", line 49, in <module>
+#     main()
+#     ~~~~^^
+#   File "/usr/lib/kselftests/drivers/net/hw/./userns_devmem.py", line 38, in main
+#     with NetDrvContEnv(__file__, userns=True, rxqueues=2,
+#          ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#                        primary_rx_redirect=True) as cfg:
+#                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+#   File "/usr/lib/kselftests/drivers/net/lib/py/env.py", line 459, in __init__
+#     self._setup_ns()
+#     ~~~~~~~~~~~~~~^^
+#   File "/usr/lib/kselftests/drivers/net/lib/py/env.py", line 524, in _setup_ns
+#     self.netns = UserNetNS() if self._userns else NetNS()
+#                  ~~~~~~~~~^^
+#   File "/usr/lib/kselftests/net/lib/py/netns.py", line 59, in __init__
+#     with subprocess.Popen(
+#          ~~~~~~~~~~~~~~~~^
+#             ["unshare", "--user", "--net", "--map-root-user",
+#             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#              "sleep", "infinity"]) as proc:
+#              ^^^^^^^^^^^^^^^^^^^^^
+#   File "/usr/lib/python3.14/subprocess.py", line 1039, in __init__
+#   File "/usr/lib/python3.14/subprocess.py", line 1990, in _execute_child
+# FileNotFoundError: [Errno 2] No such file or directory: 'unshare'
+not ok 1 selftests: drivers/net/hw: userns_devmem.py # exit=1
+# Totals: pass:0 fail:1 xfail:0 xpass:0 skip:0 error:0
