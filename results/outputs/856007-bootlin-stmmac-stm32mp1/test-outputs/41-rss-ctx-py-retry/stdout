@@ -1,0 +1,95 @@
+TAP version 13
+1..1
+# overriding timeout to 900
+# selftests: drivers/net/hw: rss_ctx.py
+# # WARN: LOCAL_V6 fd00:0:a32::2 not configured with nodad
+# # Interface: eth0, driver: st_gmac
+# TAP version 13
+# 1..20
+# # Exception| Traceback (most recent call last):
+# # Exception|   File "/usr/lib/kselftests/net/lib/py/ksft.py", line 420, in ksft_run
+# # Exception|     func(*args)
+# # Exception|     ~~~~^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/hw/./rss_ctx.py", line 123, in test_rss_key_indir
+# # Exception|     qcnt = len(_get_rx_cnts(cfg))
+# # Exception|                ~~~~~~~~~~~~^^^^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/hw/./rss_ctx.py", line 78, in _get_rx_cnts
+# # Exception|     data = cfg.netdevnl.qstats_get({"ifindex": cfg.ifindex, "scope": ["queue"]}, dump=True)
+# # Exception|   File "/usr/lib/kselftests/net/lib/ynl/pyynl/lib/ynl.py", line 1446, in _op
+# # Exception|     return self._ops(ops)[0]
+# # Exception|            ~~~~~~~~~^^^^^
+# # Exception|   File "/usr/lib/kselftests/net/lib/ynl/pyynl/lib/ynl.py", line 1403, in _ops
+# # Exception|     raise NlError(nl_msg)
+# # Exception| net.lib.ynl.pyynl.lib.ynl.NlError: Netlink error: Operation not supported {'bad-attr': '.ifindex'}
+# # Exception| 
+# not ok 1 rss_ctx.test_rss_key_indir
+# ok 2 rss_ctx.test_rss_queue_reconfigure # SKIP Not enough queues for the test or qstat not supported
+# # Exception| Traceback (most recent call last):
+# # Exception|   File "/usr/lib/kselftests/net/lib/py/ksft.py", line 420, in ksft_run
+# # Exception|     func(*args)
+# # Exception|     ~~~~^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/hw/./rss_ctx.py", line 328, in test_rss_resize
+# # Exception|     ch_max = channels['combined-max']
+# # Exception|              ~~~~~~~~^^^^^^^^^^^^^^^^
+# # Exception| KeyError: 'combined-max'
+# # Exception| 
+# not ok 3 rss_ctx.test_rss_resize
+# # Exception| Traceback (most recent call last):
+# # Exception|   File "/usr/lib/kselftests/drivers/net/hw/./rss_ctx.py", line 371, in test_hitless_key_update
+# # Exception|     ethnl.rss_set({"header": {"dev-index": cfg.ifindex}, "hkey": key})
+# # Exception|     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/net/lib/ynl/pyynl/lib/ynl.py", line 1446, in _op
+# # Exception|     return self._ops(ops)[0]
+# # Exception|            ~~~~~~~~~^^^^^
+# # Exception|   File "/usr/lib/kselftests/net/lib/ynl/pyynl/lib/ynl.py", line 1403, in _ops
+# # Exception|     raise NlError(nl_msg)
+# # Exception| net.lib.ynl.pyynl.lib.ynl.NlError: Netlink error: Invalid argument
+# # Exception| 
+# # Exception| During handling of the above exception, another exception occurred:
+# # Exception| 
+# # Exception| Traceback (most recent call last):
+# # Exception|   File "/usr/lib/kselftests/net/lib/py/ksft.py", line 420, in ksft_run
+# # Exception|     func(*args)
+# # Exception|     ~~~~^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/hw/./rss_ctx.py", line 375, in test_hitless_key_update
+# # Exception|     tgen.wait_pkts_and_stop(5000)
+# # Exception|     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/lib/py/load.py", line 117, in wait_pkts_and_stop
+# # Exception|     self.stop(verbose=failed)
+# # Exception|     ~~~~~~~~~^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/lib/py/load.py", line 120, in stop
+# # Exception|     self._iperf_client.process(terminate=True)
+# # Exception|     ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/net/lib/py/utils.py", line 123, in process
+# # Exception|     stdout, stderr = self._process_terminate(terminate=terminate,
+# # Exception|                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+# # Exception|                                              timeout=timeout)
+# # Exception|                                              ^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/net/lib/py/utils.py", line 107, in _process_terminate
+# # Exception|     stdout, stderr = self.proc.communicate(timeout=timeout)
+# # Exception|                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/python3.14/subprocess.py", line 1221, in communicate
+# # Exception|   File "/usr/lib/python3.14/subprocess.py", line 2154, in _communicate
+# # Exception|   File "/usr/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+# # Exception| subprocess.TimeoutExpired: Command '['ssh', '-q', 'root@10.250.1.1', 'iperf3 -c fd00:0:a32::2 -p 51643 -P 16 -t 86400 -J']' timed out after 20 seconds
+# # Exception| 
+# not ok 4 rss_ctx.test_hitless_key_update
+# ok 5 rss_ctx.test_rss_context # SKIP Device does not support ntuple-filters
+# ok 6 rss_ctx.test_rss_context4 # SKIP Device does not support ntuple-filters
+# ok 7 rss_ctx.test_rss_context32 # SKIP Device does not support ntuple-filters
+# ok 8 rss_ctx.test_rss_context_dump # SKIP Unable to add any contexts
+# ok 9 rss_ctx.test_rss_context_queue_reconfigure # SKIP Device does not support ntuple-filters
+# ok 10 rss_ctx.test_rss_context_overlap # SKIP Device does not support ntuple-filters
+# ok 11 rss_ctx.test_rss_context_overlap2 # SKIP Device does not support ntuple-filters
+# ok 12 rss_ctx.test_rss_context_out_of_order # SKIP Device does not support ntuple-filters
+# ok 13 rss_ctx.test_rss_context4_create_with_cfg # SKIP Device does not support ntuple-filters
+# ok 14 rss_ctx.test_flow_add_context_missing # SKIP Device does not support ntuple-filters
+# ok 15 rss_ctx.test_delete_rss_context_busy # SKIP Device does not support ntuple-filters
+# ok 16 rss_ctx.test_rss_ntuple_addition # SKIP Device does not support ntuple-filters
+# ok 17 rss_ctx.test_rss_default_context_rule # SKIP Device does not support ntuple-filters
+# ok 18 rss_ctx.test_rss_context_flow_hash # SKIP Device does not support ntuple-filters
+# ok 19 rss_ctx.test_rss_context_persist_create_and_ifdown # SKIP Device does not support ntuple-filters
+# ok 20 rss_ctx.test_rss_context_persist_ifdown_and_create # SKIP Device does not support ntuple-filters
+# # Totals: pass:0 fail:3 xfail:0 xpass:0 skip:17 error:0
+not ok 1 selftests: drivers/net/hw: rss_ctx.py # exit=1
+# Totals: pass:0 fail:1 xfail:0 xpass:0 skip:0 error:0
