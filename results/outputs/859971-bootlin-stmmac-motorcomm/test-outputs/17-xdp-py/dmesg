@@ -1,0 +1,67 @@
+[  116.189059] kselftest: Running tests in drivers/net
+[  119.512583] dwmac-motorcomm 0001:01:00.0 eth2: Register MEM_TYPE_PAGE_POOL RxQ-0
+[  140.520047] rcu: INFO: rcu_sched detected stalls on CPUs/tasks:
+[  140.520067] rcu: 	0-...0: (6 ticks this GP) idle=d68c/1/0x4000000000000000 softirq=2226/2228 fqs=2384
+[  140.520082] rcu: 	(detected by 3, t=5252 jiffies, g=4073, q=276 ncpus=4)
+[  140.520091] Sending NMI from CPU 3 to CPUs 0:
+[  150.521147] After 10 seconds, these CPUS still haven't responded to the NMI: 0
+[  150.521163] rcu: rcu_sched kthread timer wakeup didn't happen for 2501 jiffies! g4073 f0x0 RCU_GP_WAIT_FQS(5) ->state=I
+[  150.521173] rcu: 	Possible timer handling issue on cpu=3 timer-softirq=1263
+[  150.521179] rcu: rcu_sched kthread starved for 2502 jiffies! g4073 f0x0 RCU_GP_WAIT_FQS(5) ->state=I ->cpu=3
+[  150.521187] rcu: 	Unless rcu_sched kthread gets sufficient CPU time, OOM is now expected behavior.
+[  150.521193] rcu: RCU grace-period kthread stack dump:
+[  150.521197] task:rcu_sched       state:I stack:0     pid:15    tgid:15    ppid:2      task_flags:0x208040 flags:0x00000000
+[  150.521213] Call Trace:
+[  150.521219] [<ffffffff80ed4b04>] __schedule+0x3d4/0xff8
+[  150.521237] [<ffffffff80ed5756>] schedule+0x2e/0xc8
+[  150.521246] [<ffffffff80edd48a>] schedule_timeout+0x82/0x118
+[  150.521257] [<ffffffff800d3582>] rcu_gp_fqs_loop+0xda/0x610
+[  150.521269] [<ffffffff800d6338>] rcu_gp_kthread+0x140/0x240
+[  150.521278] [<ffffffff800661fa>] kthread+0xfa/0x130
+[  150.521289] [<ffffffff80016bd8>] ret_from_fork_kernel+0x20/0x180
+[  150.521301] [<ffffffff80ee0946>] ret_from_fork_kernel_asm+0x16/0x18
+[  150.521312] rcu: Stack dump where RCU GP kthread last ran:
+[  150.521320] CPU: 3 UID: 0 PID: 0 Comm: swapper/3 Not tainted 7.3.0-rc6-01951-ga0086fa0764f-dirty #860 PREEMPTLAZY 
+[  150.521330] Hardware name: StarFive VisionFive 2 v1.3B (DT)
+[  150.521335] epc : default_idle_call+0x38/0x180
+[  150.521345]  ra : default_idle_call+0x30/0x180
+[  150.521353] epc : ffffffff80ed27d0 ra : ffffffff80ed27c8 sp : ffffffc6000c3e20
+[  150.521359]  gp : ffffffff83c8a528 tp : ffffffd6c02ecf80 t0 : ffffffff80022128
+[  150.521366]  t1 : 0000000000000001 t2 : ffffffd6c03728e0 s0 : ffffffc6000c3e40
+[  150.521372]  s1 : 0000000000000000 a0 : 0000000000019b81 a1 : ffffffd77c561000
+[  150.521378]  a2 : 0000000000000003 a3 : ffffffff82a55510 a4 : ffffffff82a55518
+[  150.521384]  a5 : 0000000000000000 a6 : ffffffd6fefb6508 a7 : ffffffff83cd3de8
+[  150.521390]  s2 : 0000000000000001 s3 : ffffffff83cd3de8 s4 : 0000000000000004
+[  150.521396]  s5 : 0000000000000000 s6 : 8000000a00006800 s7 : 0000000000000000
+[  150.521402]  s8 : 000000000000000c s9 : 0000000040035ac0 s10: 0000000000000000
+[  150.521408]  s11: 0000000000000000 t3 : 0000000000000008 t4 : ffffffd6c03728c0
+[  150.521414]  t5 : 00000000000002f0 t6 : 00000000000002f0 ssp : 0000000000000000
+[  150.521420] status: 0000000200000120 badaddr: 0000000000000000 cause: 8000000000000005
+[  150.521426] [<ffffffff80ed27d0>] default_idle_call+0x38/0x180
+[  150.521435] [<ffffffff800938fa>] do_idle+0x23a/0x300
+[  150.521444] [<ffffffff80093ba4>] cpu_startup_entry+0x3c/0x48
+[  150.521453] [<ffffffff8001ffc4>] smp_callin+0x74/0x98
+[  178.646656] NMI backtrace for cpu 0
+[  178.646674] CPU: 0 UID: 0 PID: 41 Comm: kworker/u16:1 Not tainted 7.3.0-rc6-01951-ga0086fa0764f-dirty #860 PREEMPTLAZY 
+[  178.646683] Hardware name: StarFive VisionFive 2 v1.3B (DT)
+[  178.646689] Workqueue: events_unbound linkwatch_event
+[  178.646707] epc : handle_softirqs+0xb8/0x398
+[  178.646719]  ra : __irq_exit_rcu+0xe6/0x148
+[  178.646727] epc : ffffffff80041e68 ra : ffffffff8004227e sp : ffffffc600003ef0
+[  178.646732]  gp : ffffffff83c8a528 tp : ffffffd6c0addcc0 t0 : ffffffff80021db0
+[  178.646737]  t1 : 54838db7c5400000 t2 : 0a00000000000000 s0 : ffffffc600003fa0
+[  178.646741]  s1 : ffffffff82a58540 a0 : 0000000000000000 a1 : ffffffff82a58580
+[  178.646746]  a2 : 00000000ffff897d a3 : ffffffd6fef5c580 a4 : ffffffd6fef5c580
+[  178.646750]  a5 : ffffffff82a58580 a6 : ffffffff83cd3de8 a7 : 79e4480a00000000
+[  178.646755]  s2 : ffffffff83cd3de8 s3 : 0000000000000048 s4 : 8000000000000009
+[  178.646759]  s5 : ffffffd6c0addcc0 s6 : ffffffd6c018c605 s7 : ffffffff83cd3de8
+[  178.646763]  s8 : ffffffff83ca1918 s9 : ffffffff82a462a8 s10: ffffffff83a09080
+[  178.646768]  s11: ffffffff83d00fb0 t3 : ec0d522f231a0000 t4 : 6782686eb7000000
+[  178.646773]  t5 : 0000000000000000 t6 : 0000000000000000 ssp : 0000000000000000
+[  178.646777] status: 0000000200000120 badaddr: 0000000000000000 cause: 8000000000000001
+[  178.646782] [<ffffffff80041e68>] handle_softirqs+0xb8/0x398
+[  178.646791] [<ffffffff8004227e>] __irq_exit_rcu+0xe6/0x148
+[  178.646799] [<ffffffff80042528>] irq_exit_rcu+0x18/0x28
+[  178.646807] [<ffffffff80ecf8d4>] handle_riscv_irq+0x64/0x78
+[  178.646816] [<ffffffff80ee098e>] call_on_irq_stack+0x32/0x40
+[  178.649005] dwmac-motorcomm 0001:01:00.0 eth2: Register MEM_TYPE_PAGE_POOL RxQ-0
