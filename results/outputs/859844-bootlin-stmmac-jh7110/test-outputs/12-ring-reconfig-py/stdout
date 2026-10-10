@@ -1,0 +1,43 @@
+TAP version 13
+1..1
+# overriding timeout to 900
+# selftests: drivers/net: ring_reconfig.py
+# # Interface: eth1, driver: st_gmac
+# TAP version 13
+# 1..3
+# # Okay {'rx-count': 1, 'tx-count': 1, 'combined-count': 0}
+# # Okay {'rx-count': 1, 'tx-count': 1, 'combined-count': 0}
+# ok 1 ring_reconfig.channels
+# # Reached min for 'tx' at 64 (max 512)
+# # Reached min for 'rx' at 64 (max 512)
+# # Exception| Traceback (most recent call last):
+# # Exception|   File "/usr/lib/kselftests/net/lib/py/ksft.py", line 420, in ksft_run
+# # Exception|     func(*args)
+# # Exception|     ~~~~^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/./ring_reconfig.py", line 155, in ringparam
+# # Exception|     GenerateTraffic(cfg).wait_pkts_and_stop(10000)
+# # Exception|     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/lib/py/load.py", line 117, in wait_pkts_and_stop
+# # Exception|     self.stop(verbose=failed)
+# # Exception|     ~~~~~~~~~^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/drivers/net/lib/py/load.py", line 120, in stop
+# # Exception|     self._iperf_client.process(terminate=True)
+# # Exception|     ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/net/lib/py/utils.py", line 123, in process
+# # Exception|     stdout, stderr = self._process_terminate(terminate=terminate,
+# # Exception|                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+# # Exception|                                              timeout=timeout)
+# # Exception|                                              ^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/kselftests/net/lib/py/utils.py", line 107, in _process_terminate
+# # Exception|     stdout, stderr = self.proc.communicate(timeout=timeout)
+# # Exception|                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+# # Exception|   File "/usr/lib/python3.14/subprocess.py", line 1221, in communicate
+# # Exception|   File "/usr/lib/python3.14/subprocess.py", line 2154, in _communicate
+# # Exception|   File "/usr/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+# # Exception| subprocess.TimeoutExpired: Command '['ssh', '-q', 'root@10.250.5.1', 'iperf3 -c fd00:0:c0a8:2::1a -p 34865 -P 16 -t 86400 -J']' timed out after 20 seconds
+# # Exception| 
+# not ok 2 ring_reconfig.ringparam
+# ok 3 ring_reconfig.reconfig_tx_stall # SKIP device does not support combined channels
+# # Totals: pass:1 fail:1 xfail:0 xpass:0 skip:1 error:0
+not ok 1 selftests: drivers/net: ring_reconfig.py # exit=1
+# Totals: pass:0 fail:1 xfail:0 xpass:0 skip:0 error:0
